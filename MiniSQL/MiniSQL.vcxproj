@@ -69,12 +69,15 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>C:\Program Files %28x86%29\boost;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -111,6 +114,46 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="API.cpp" />
+    <ClCompile Include="Attribute.cpp" />
+    <ClCompile Include="BufferBlock.cpp" />
+    <ClCompile Include="CatalogManager.cpp" />
+    <ClCompile Include="ColumnAttribute.cpp" />
+    <ClCompile Include="Condition.cpp" />
+    <ClCompile Include="Data.cpp" />
+    <ClCompile Include="DataC.cpp" />
+    <ClCompile Include="DataF.cpp" />
+    <ClCompile Include="DataI.cpp" />
+    <ClCompile Include="Index.cpp" />
+    <ClCompile Include="IndexManager.cpp" />
+    <ClCompile Include="Interpreter.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="QueryException.cpp" />
+    <ClCompile Include="RecordManager.cpp" />
+    <ClCompile Include="Table.cpp" />
+    <ClCompile Include="Tuple.cpp" />
+    <ClCompile Include="Where.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="API.h" />
+    <ClInclude Include="Attribute.h" />
+    <ClInclude Include="BufferBlock.h" />
+    <ClInclude Include="CatalogManager.h" />
+    <ClInclude Include="ColumnAttribute.h" />
+    <ClInclude Include="Condition.h" />
+    <ClInclude Include="Data.h" />
+    <ClInclude Include="DataC.h" />
+    <ClInclude Include="DataF.h" />
+    <ClInclude Include="DataI.h" />
+    <ClInclude Include="Index.h" />
+    <ClInclude Include="IndexManager.h" />
+    <ClInclude Include="Interpreter.h" />
+    <ClInclude Include="QueryException.h" />
+    <ClInclude Include="RecordManager.h" />
+    <ClInclude Include="SqlRegex.h" />
+    <ClInclude Include="Table.h" />
+    <ClInclude Include="Tuple.h" />
+    <ClInclude Include="Where.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

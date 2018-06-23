@@ -13,5 +13,129 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="來源檔案\DataType">
+      <UniqueIdentifier>{2acece67-bdd1-4660-b07e-3f3147e6abe3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="標頭檔\DataType">
+      <UniqueIdentifier>{7ffb010d-a3f4-4308-a627-d73a278f0166}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="API.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="Interpreter.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="QueryException.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="CatalogManager.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="Data.cpp">
+      <Filter>來源檔案\DataType</Filter>
+    </ClCompile>
+    <ClCompile Include="DataI.cpp">
+      <Filter>來源檔案\DataType</Filter>
+    </ClCompile>
+    <ClCompile Include="DataF.cpp">
+      <Filter>來源檔案\DataType</Filter>
+    </ClCompile>
+    <ClCompile Include="DataC.cpp">
+      <Filter>來源檔案\DataType</Filter>
+    </ClCompile>
+    <ClCompile Include="ColumnAttribute.cpp">
+      <Filter>來源檔案\DataType</Filter>
+    </ClCompile>
+    <ClCompile Include="Condition.cpp">
+      <Filter>來源檔案\DataType</Filter>
+    </ClCompile>
+    <ClCompile Include="Attribute.cpp">
+      <Filter>來源檔案\DataType</Filter>
+    </ClCompile>
+    <ClCompile Include="Index.cpp">
+      <Filter>來源檔案\DataType</Filter>
+    </ClCompile>
+    <ClCompile Include="Tuple.cpp">
+      <Filter>來源檔案\DataType</Filter>
+    </ClCompile>
+    <ClCompile Include="Table.cpp">
+      <Filter>來源檔案\DataType</Filter>
+    </ClCompile>
+    <ClCompile Include="Where.cpp">
+      <Filter>來源檔案\DataType</Filter>
+    </ClCompile>
+    <ClCompile Include="BufferBlock.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="RecordManager.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="IndexManager.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="API.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Interpreter.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="QueryException.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="SqlRegex.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="CatalogManager.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Data.h">
+      <Filter>標頭檔\DataType</Filter>
+    </ClInclude>
+    <ClInclude Include="DataI.h">
+      <Filter>標頭檔\DataType</Filter>
+    </ClInclude>
+    <ClInclude Include="DataF.h">
+      <Filter>標頭檔\DataType</Filter>
+    </ClInclude>
+    <ClInclude Include="DataC.h">
+      <Filter>標頭檔\DataType</Filter>
+    </ClInclude>
+    <ClInclude Include="ColumnAttribute.h">
+      <Filter>標頭檔\DataType</Filter>
+    </ClInclude>
+    <ClInclude Include="Condition.h">
+      <Filter>標頭檔\DataType</Filter>
+    </ClInclude>
+    <ClInclude Include="Attribute.h">
+      <Filter>標頭檔\DataType</Filter>
+    </ClInclude>
+    <ClInclude Include="Index.h">
+      <Filter>標頭檔\DataType</Filter>
+    </ClInclude>
+    <ClInclude Include="Tuple.h">
+      <Filter>標頭檔\DataType</Filter>
+    </ClInclude>
+    <ClInclude Include="Table.h">
+      <Filter>標頭檔\DataType</Filter>
+    </ClInclude>
+    <ClInclude Include="Where.h">
+      <Filter>標頭檔\DataType</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferBlock.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="RecordManager.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="IndexManager.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
