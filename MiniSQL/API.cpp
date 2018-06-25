@@ -67,47 +67,77 @@ void API::select(
 	const std::vector<Condition> & conds
 )
 {
-	std::cout << "----------" << std::endl;
-	std::cout << "Table: {" << table << "}" << std::endl;
-	std::cout << "Columns: " << std::endl;
+	CatalogManager catalog_manager;
+	RecordManager record_manager;
 
-	if (columns.size() == 1 && columns.front() == "*") {
-		std::cout << "All Columns." << std::endl;
-	} else {
-		for (const auto & col : columns) {
-			std::cout << "    {" << col << "}" << std::endl;
-		}
-	}
+	Table * table_ptr = catalog_manager.getTable(table);
+	//Table * table_ptr = nullptr;
 
-	std::cout << "Where: " << std::endl;
+	//Table output = api.Select(*t, attrselect, attrwhere, w);
+
+	//return rm.Select(tableIn, attrSelect, mask, w);
+
+	vector<Where> where_conds;
+	vector<int> where_indices;
+	vector<int> select_indices;
+
 	for (const auto & cond : conds) {
-		std::cout << "    {" << cond.column << "} ";
+		Where w;
 
 		std::string op;
 		switch (cond.type) {
-			case Condition::Equal:
-				op = "=";
-				break;
-			case Condition::NotEqual:
-				op = "<>";
-				break;
-			case Condition::Greater:
-				op = ">";
-				break;
-			case Condition::Less:
-				op = "<";
-				break;
-			case Condition::GreaterOrEqual:
-				op = ">=";
-				break;
-			case Condition::LessOrEqual:
-				op = "<=";
-				break;
+		case Condition::Equal:
+			w.flag = Where::eq;
+			break;
+		case Condition::NotEqual:
+			w.flag = Where::neq;
+			break;
+		case Condition::Greater:
+			w.flag = Where::g;
+			break;
+		case Condition::Less:
+			w.flag = Where::l;
+			break;
+		case Condition::GreaterOrEqual:
+			w.flag = Where::geq;
+			break;
+		case Condition::LessOrEqual:
+			w.flag = Where::leq;
+			break;
 		}
 
-		std::cout << op << " {" << cond.value << "}" << std::endl;
+		const auto & table_attr = table_ptr->getattribute();
+
+		for (int i = 0; i < table_attr.num; i++) {
+			const string & attr_name = table_attr.name[i];
+			const int attr_flag = table_attr.flag[i];
+			if (cond.column == attr_name) {
+				w.d = API::toData(attr_flag, cond.value);
+			}
+		}
+
+		where_conds.push_back(w);
 	}
-	std::cout << "----------" << std::endl;
+
+	const auto & table_attr = table_ptr->getattribute();
+
+	for (int i = 0; i < table_attr.num; i++) {
+		const string & attr_name = table_attr.name[i];
+		for (const auto & cond : conds) {
+			if (cond.column == attr_name) {
+				where_indices.push_back(i);
+			}
+		}
+
+		for (const auto & column : columns) {
+			if (column == attr_name) {
+				select_indices.push_back(i);
+			}
+		}
+	}
+
+	Table result = record_manager.Select(*table_ptr, select_indices, where_indices, where_conds);
+	result.display();
 }
 
 
