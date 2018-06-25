@@ -11,6 +11,8 @@ class API
 private:
 	RecordManager record_manager;
 
+	static Data * toData(const int attr_flag, const string & value);
+
 public:
 	API();
 	virtual ~API();

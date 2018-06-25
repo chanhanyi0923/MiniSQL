@@ -3,12 +3,16 @@
 
 #include <iostream>
 
+#include <boost/lexical_cast.hpp>
 
 #include "BufferBlock.h"
 #include "IndexManager.h"
 #include "CatalogManager.h"
-
-
+#include "QueryException.h"
+#include "Data.h"
+#include "DataC.h"
+#include "DataF.h"
+#include "DataI.h"
 
 API::API()
 {
@@ -18,6 +22,43 @@ API::API()
 API::~API()
 {
 }
+
+
+Data * API::toData(const int attr_flag, const string & value)
+{
+	Data * data = nullptr;
+	if (attr_flag == -1) {
+		// int
+		int d;
+		try {
+			d = boost::lexical_cast<int>(value);
+		}
+		catch (...) {
+			throw QueryException("the format of length is invalid.");
+		}
+
+		data = new DataI(d);
+	}
+	else if (attr_flag == 0) {
+		// float
+		float d;
+		try {
+			d = boost::lexical_cast<float>(value);
+		}
+		catch (...) {
+			throw QueryException("the format of length is invalid.");
+		}
+
+		data = new DataF(d);
+	}
+	else {
+		// char
+		data = new DataC(value);
+	}
+	return data;
+}
+
+
 
 
 void API::select(
@@ -115,13 +156,22 @@ void API::insert(
 	const std::vector<std::string> & values
 )
 {
-	std::cout << "----------" << std::endl;
-	std::cout << "Table: {" << table << "}" << std::endl;
-	std::cout << "Values: " << std::endl;
-	for (const auto & value : values) {
-		std::cout << "    {" << value << "}" << std::endl;
+	CatalogManager catalog_manager;
+	RecordManager record_manager;
+
+	Table * table_ptr = catalog_manager.getTable(table);
+
+	const auto & table_attr = table_ptr->getattribute();
+
+	Tuple tuple;
+	for (size_t i = 0; i < values.size(); i++) {
+		const std::string & value = values[i];
+		const int attr_flag = table_attr.flag[i];
+		Data * data = API::toData(attr_flag, value);
+		tuple.addData(data);
 	}
-	std::cout << "----------" << std::endl;
+
+	record_manager.Insert(*table_ptr, tuple);
 }
 
 
