@@ -113,7 +113,7 @@ void CatalogManager::recreate_table(string name, Attribute atb, int primary, Ind
 	pos = pos + sizeof(int);
 	memcpy(&begin[pos], &index.num, sizeof(int));
 	pos = pos + sizeof(int);
-	int bn = 0;//////////////////////////////？？？？
+	int bn = 0;//
 	memcpy(&begin[pos], &bn, sizeof(int));
 	pos = pos + sizeof(int);
 	memcpy(&begin[pos], &primary, sizeof(int));
@@ -148,7 +148,7 @@ void CatalogManager::recreate_table(string name, Attribute atb, int primary, Ind
 		memcpy(&begin[pos], &index.location[i], sizeof(short));
 		pos = pos + sizeof(short);
 	}
-
+	BufferBlock::m_blocks[blockNum].not_being_used();
 	BufferBlock::m_blocks[blockNum].written();//给这个位置标记：已经写过
 }
 
@@ -362,6 +362,8 @@ void CatalogManager::changeblock(string tname, int bn) {
 	pos = pos + sizeof(int);
 	pos = pos + sizeof(int);
 	memcpy(&begin[pos], &bn, sizeof(int));
+	BufferBlock::m_blocks[blockNum].not_being_used();
+	BufferBlock::m_blocks[blockNum].written();//给这个位置标记：已经写过
 	//bf.using_block(blockNum);
 	return;
 }

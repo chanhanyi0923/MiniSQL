@@ -37,14 +37,14 @@ Table::~Table()
 void Table::addData(Tuple* t)
 {
 	if (t->length() != attr.num)//插入的data的个数应该等于attribute的个数
-		throw ("Illegal Tuper Inserted: unequal column size!");
+		throw ("Illegal Tuple Inserted: unequal column size!");
 	//影响效率的话可以删掉这段
 	for (int i = 0; i < getattNum(); i++) {
 		int j = (*t)[i]->flag;
 		if (j > attr.flag[i])
-			throw ("Illegal Tuper Inserted: unequal attributes!");
+			throw ("Illegal Tuple Inserted: unequal attributes!");
 		else if (j < attr.flag[i] && j <= 0)//j是int或float而实际应该为char
-			throw ("Illegal Tuper Inserted: unequal attributes!");
+			throw ("Illegal Tuple Inserted: unequal attributes!");
 	}
 	T.push_back(t);
 }
