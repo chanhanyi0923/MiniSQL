@@ -4,9 +4,13 @@
 #include <string>
 #include "Condition.h"
 #include "ColumnAttribute.h"
+#include "RecordManager.h"
 
 class API
 {
+private:
+	RecordManager record_manager;
+
 public:
 	API();
 	virtual ~API();

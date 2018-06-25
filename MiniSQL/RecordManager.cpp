@@ -1,9 +1,11 @@
 ﻿#include "RecordManager.h"
 
-#include "CatalogManager.h"
 #include <fstream>
 #include <string>
 
+#include "CatalogManager.h"
+#include "IndexManager.h"
+#include "InsertPos.h"
 #include "Data.h"
 #include "DataI.h"
 #include "DataF.h"
@@ -186,7 +188,7 @@ void RecordManager::Insert(Table& tableIn, Tuple& singleTuple)
 	char *charTuple;
 	charTuple = Tuple2Char(tableIn, singleTuple);//把一个元组转换成字符串
 												 //获取插入位置
-	insertPos iPos;
+	InsertPos iPos;
 	if (tableIn.blockNum == 0) { //new file and no block exist 
 		iPos.bufferNUM = addBlockInFile(tableIn);
 		iPos.position = 0;
@@ -230,17 +232,17 @@ void RecordManager::Insert(Table& tableIn, Tuple& singleTuple)
 	buffer.m_blocks[iPos.bufferNUM].address[iPos.position] = NOTEMPTY;
 	memcpy(&(buffer.m_blocks[iPos.bufferNUM].address[iPos.position + 1]), charTuple, tableIn.dataSize());
 	int length = tableIn.dataSize() + 1; //一个元组的信息在文档中的长度
-										 //////////////////////////////////////////////
-										 //insert tuple into index file
-										 //IndexManager indexMA;
-										 //int blockCapacity = BLOCKSIZE / length;
-										 //for (int i = 0; i < tableIn.index.num; i++) {
-										 //	int tuperAddr = buffer.m_blocks[iPos.bufferNUM].offset*blockCapacity + iPos.position / length; //the tuper's addr in the data file
-										 //	for (int j = 0; j < tableIn.index.num; j++) {
-										 //		indexMA.Insert(tableIn.getname() + to_string(tableIn.index.location[j]) + ".index", singleTuple[tableIn.index.location[i]], tuperAddr);
-										 //	}
-										 //}
-										 //////////////////////////////////////////////
+	//////////////////////////////////////////////
+	//insert tuple into index file
+	//IndexManager indexMA;
+	//int blockCapacity = BLOCK_SIZE / length;
+	//for (int i = 0; i < tableIn.index.num; i++) {
+	//	int tuperAddr = buffer.m_blocks[iPos.bufferNUM].offset*blockCapacity + iPos.position / length; //the tuper's addr in the data file
+	//	for (int j = 0; j < tableIn.index.num; j++) {
+	//		indexMA.Insert(tableIn.getname() + to_string(tableIn.index.location[j]) + ".index", singleTuple[tableIn.index.location[i]], tuperAddr);
+	//	}
+	//}
+	//////////////////////////////////////////////
 	buffer.m_blocks[iPos.bufferNUM].written();
 	delete[] charTuple;
 }
@@ -414,47 +416,9 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect, vector<int>ma
 	int length = tableIn.dataSize() + 1;
 	const int recordNum = BLOCK_SIZE / length;
 
-	//to find whether there is an index on selected key
-	//IndexManager indexMA;
-	//int inPos = -1;//index position
-	//for (int i = 0; i < w.size();i++) {
-	//	if (w[i].flag == Where::eq){
-	//		for (int j = 0; j < tableIn.index.num;j++) {
-	//			if (tableIn.index.location[j] == mask[i]){	
-	//				Data* ptrData;
-	//				ptrData = w[i].d;
-	//				indexfilename = tableIn.Tname + to_string(mask[i]) + ".index";
-	//				inPos = indexMA.Find(indexfilename, ptrData);
-	//				break;
-	//			}
-	//		}
-	//		if (inPos != -1){
-	//			break;
-	//		}
-	//	}
-	//}/// finding.... 
-	//if (inPos!=-1){ //result found
-	//	int blockOffset = inPos / recordNum;
-	//	int recordOffset = inPos % recordNum;
-	//	int datalen = tableIn.dataSize();
-	//	int bitOffset = recordOffset *(1+datalen);
-	//	int blockNum;
-	//	blockNum = bf.GiveMeABlock(filename, blockOffset);
-	//	char *pdata;
-	//	pdata = new char(datalen+1);
-	//	memcpy(pdata, &(buf_ptr->bufferBlock[blockNum].values[bitOffset]), datalen+1);
-
-	//	tuper *single_tuper = Char2Tuper(tableIn, pdata);
-	//	//delete[] pdata;
-	//	tableIn.addData(single_tuper);
-	//	return SelectProject(tableIn, attrSelect);
-	//}
+	
 	for (int blockOffset = 0; blockOffset < tableIn.blockNum; blockOffset++) {
-		/*int bufferNum = buf_ptr->getIfIsInBuffer(filename, blockOffset);
-		if (bufferNum == -1) {
-		bufferNum = buf_ptr->getEmptyBuffer();
-		buf_ptr->readBlock(filename, blockOffset, bufferNum);
-		}*/
+
 		//返回一个
 		int bufferNum = buffer.read_block(filename, blockOffset, 1);
 		//tableIn.linklist.push_back(bufferNum);
@@ -589,7 +553,9 @@ bool RecordManager::UNIQUE(Table& tableIn, Where w, int loca) {
 
 int RecordManager::addBlockInFile(Table& tableinfor)
 {
-	int bufferNum = buffer.get_blank();
+	string filename = tableinfor.getname() + ".table";
+
+	int bufferNum = buffer.get_blank(filename);
 	tableinfor.linklist[tableinfor.blockNum] = bufferNum;
 	buffer.m_blocks[bufferNum].flush_block();
 	buffer.m_blocks[bufferNum].name = tableinfor.getname() + ".table";

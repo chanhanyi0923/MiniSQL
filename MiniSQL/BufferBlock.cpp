@@ -191,3 +191,17 @@ void BufferBlock::written()
 	dirty_bit = 1;
 }
 
+
+
+std::string BufferBlock::getvalues(int startpos, int endpos)
+{
+	using std::string;
+	string tmpt = "";
+	if (startpos >= 0 && startpos <= endpos && endpos <= BLOCK_SIZE)
+		for (int i = startpos; i < endpos; i++)
+			tmpt += address[i];
+	return tmpt;
+}
+
+
+

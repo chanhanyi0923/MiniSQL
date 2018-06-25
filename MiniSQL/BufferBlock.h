@@ -46,6 +46,7 @@ public:
 	unsigned int get_blank(unsigned int offset);
 	void flush_block();
 	static unsigned int max_count_block();
+	std::string getvalues(int startpos, int endpos);
+
 
 };
-

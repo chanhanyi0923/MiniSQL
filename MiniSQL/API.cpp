@@ -1,6 +1,14 @@
-#include "API.h"
+﻿#include "API.h"
+
 
 #include <iostream>
+
+
+#include "BufferBlock.h"
+#include "IndexManager.h"
+#include "CatalogManager.h"
+
+
 
 API::API()
 {
@@ -123,32 +131,58 @@ void API::createTable(
 	const std::vector<ColumnAttribute> & attrs
 )
 {
-	std::cout << "----------" << std::endl;
-	std::cout << "Table: {" << table << "}" << std::endl;
-	std::cout << "Primary Key: {" << primary_key << "}" << std::endl;
-	for (const auto & attr : attrs) {
-		std::string type;
+	Index index;
+	index.num = 0;
+
+	short primary = -1;
+	Attribute atb;
+	atb.num = attrs.size();
+	for (int i = 0; i < attrs.size(); i++) {
+		const ColumnAttribute & attr = attrs[i];
+
+		int &type = atb.flag[i];
+		atb.name[i] = attr.name;
+		atb.unique[i] = attr.unique;
+
 		switch (attr.type) {
 		case ColumnAttribute::Character:
-			type = "char";
+			type = attr.length;
 			break;
 		case ColumnAttribute::Integer:
-			type = "int";
+			type = -1;
 			break;
 		case ColumnAttribute::Float:
-			type = "float";
+			type = 0;
 			break;
-
 		}
 
-		std::cout << "    name: {" << attr.name << "}" << std::endl;
-		std::cout << "    type: {" << type << "}" << std::endl;
-		std::cout << "    length: {" << attr.length << "}" << std::endl;
-		if (attr.unique) {
-			std::cout << "    (unique)" << std::endl;
+		if (attr.name == primary_key) {
+			primary = i;
+			atb.unique[i] = true;
 		}
-		std::cout << std::endl;
 	}
+
+	BufferBlock buffer;
+	CatalogManager catalog_manager;
+
+	catalog_manager.create_table(table, atb, primary, index, buffer);
+
+	if (primary != -1) {
+		catalog_manager.create_index(table, primary_key, primary_key, buffer);
+	}
+
+
+	//IndexManager index_manager;
+	////bool res;
+	////int i;
+
+	////getTable
+	////res = record_manager.CreateTable(tableIn);
+	//index_manager
+
+	Table * table_ptr = catalog_manager.getTable(table, buffer);
+	record_manager.CreateTable(*table_ptr, buffer);
+	delete table_ptr;
 }
 
 void API::dropTable(

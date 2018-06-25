@@ -20,8 +20,6 @@ public:
 	IndexManager();
 	~IndexManager();
 
-public:
-	IndexManager() {};
 
 	//初始化结构体。从buffer中读必要信息
 	void Init(string file, int keyType);
@@ -39,7 +37,6 @@ public:
 	int*Range(string file, Data*key1, Data*key2);
 
 	void WriteBack();
-	~IndexManager() {};
 
 private:
 	int size;

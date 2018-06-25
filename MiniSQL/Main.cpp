@@ -8,9 +8,12 @@
 #include "BufferBlock.h"
 
 BufferBlock * BufferBlock::m_blocks = NULL;
+BufferBlock buffer;
 
 int main(int argc, char *argv[])
 {
+	BufferBlock::initiate_blocks();
+
 	API api;
 	Interpreter interpreter;
 	for (bool repeat = true; repeat; ) {

@@ -38,8 +38,8 @@ void CatalogManager::create_table(string name, Attribute atb, short primary, Ind
 	fstream fout(filename , ios::out);
 	fout.close();
 	//获取指定block在BufferBlock中的序号
-#ifndef DEBUG
-	int blockNum = bf.write_block(1);//    1表示table/0表示index
+#ifdef DEBUG
+	int blockNum = bf.write_block(filename,1);//    1表示table/0表示index
 #else
 	int blockNum = 0;
 #endif

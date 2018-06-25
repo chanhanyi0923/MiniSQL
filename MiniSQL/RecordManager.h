@@ -30,9 +30,9 @@ public:
 	Tuple String2Tuple(Table& tableIn, string stringRow);
 
 	//这个用index来做一次比较快速的查找
-	//int FindWithIndex(Table& tableIn, tuper& row, int mask);
-	//bool CreateIndex(Table& tableIn, int attr);
-	//void InsertWithIndex(Table& tableIn, tuper& singleTuper);
+	/*int FindWithIndex(Table& tableIn, Tuple& row, int mask);*/
+	/*bool CreateIndex(Table& tableIn, int attr);
+	void InsertWithIndex(Table& tableIn, Tuple& singleTuper);*/
 	void Insert(Table& tableIn, Tuple& singleTuple);
 	int Delete(Table& tableIn, vector<int>mask, vector<Where> w);
 	Table SelectProject(Table& tableIn, vector<int>attrSelect);
