@@ -29,33 +29,37 @@ bool CatalogManager::hasTable(std::string name) {
 	}
 }
 
-void CatalogManager::create_table(string name, Attribute atb, short primary, Index index, BufferBlock bf) {
+void CatalogManager::create_table(string name, Attribute atb, int primary, Index index) {
 	if (hasTable(name))
 		throw ("ERROR in mycatalogmanager::create_table: table: " + name + "exist");
 	if (primary >= 0) atb.unique[primary] = true;
 	//创建文件
 	string filename = "Table" + name;
-	fstream fout(filename , ios::out);
+	fstream fout(filename, ios::out);
 	fout.close();
 	//获取指定block在BufferBlock中的序号
 #ifdef DEBUG
-	int blockNum = bf.write_block(filename,1);//    1表示table/0表示index
+	int blockNum = buffer.write_block(filename, 1);//    1表示table/0表示index
 #else
 	int blockNum = 0;
 #endif
 
 	//通过序号在m_blocks[MAX_BLOCKS]中找到对应的内存信息（address）
 	//先写入一些文件头信息,attribute个数，index个数，以及占几个block，主键primary是谁
-	char* begin = bf.m_blocks[blockNum].address;
+	char* begin = BufferBlock::m_blocks[blockNum].address;
 	int pos = 0;
 	memcpy(&begin[pos], &atb.num, sizeof(int));
+	//int a = *(int*)(begin+pos);
 	pos = pos + sizeof(int);
 	memcpy(&begin[pos], &index.num, sizeof(int));
+	//int b = *(int*)(begin + pos);
 	pos = pos + sizeof(int);
 	int bn = 0;
 	memcpy(&begin[pos], &bn, sizeof(int));
+	//int c = *(int*)(begin + pos);
 	pos = pos + sizeof(int);
 	memcpy(&begin[pos], &primary, sizeof(int));
+	//int d = *(int*)(begin + pos);
 	pos = pos + sizeof(int);
 
 	//然后写入具体的内存信息
@@ -87,11 +91,11 @@ void CatalogManager::create_table(string name, Attribute atb, short primary, Ind
 		memcpy(&begin[pos], &index.location[i], sizeof(short));
 		pos = pos + sizeof(short);
 	}
-
-	bf.m_blocks[blockNum].written();//给这个位置标记：已经写过
+	BufferBlock::m_blocks[blockNum].not_being_used();
+	BufferBlock::m_blocks[blockNum].written();//给这个位置标记：已经写过
 }
 
-void CatalogManager::recreate_table(string name, Attribute atb, short primary, Index index, BufferBlock bf) {
+void CatalogManager::recreate_table(string name, Attribute atb, int primary, Index index) {
 	if (hasTable(name))
 		throw ("ERROR in mycatalogmanager::create_table: table: " + name + "exist");
 	if (primary >= 0) atb.unique[primary] = true;
@@ -100,10 +104,10 @@ void CatalogManager::recreate_table(string name, Attribute atb, short primary, I
 	fstream fout(filename, ios::out);
 	fout.close();
 	//获取指定block在BufferBlock中的序号
-	int blockNum = bf.read_block(name, 0, 1);   //1表示table/2表示index
+	int blockNum = buffer.read_block(filename, 0, 1);   //1表示table/2表示index
 	//通过序号在m_blocks[MAX_BLOCKS]中找到对应的内存信息（address）
 	//先写入一些文件头信息,attribute个数，index个数，以及占几个block，主键primary是谁
-	char* begin = bf.m_blocks[blockNum].address;
+	char* begin = BufferBlock::m_blocks[blockNum].address;
 	int pos = 0;
 	memcpy(&begin[pos], &atb.num, sizeof(int));
 	pos = pos + sizeof(int);
@@ -145,29 +149,34 @@ void CatalogManager::recreate_table(string name, Attribute atb, short primary, I
 		pos = pos + sizeof(short);
 	}
 
-	bf.m_blocks[blockNum].written();//给这个位置标记：已经写过
+	BufferBlock::m_blocks[blockNum].written();//给这个位置标记：已经写过
 }
 
-Table* CatalogManager::getTable(string name, BufferBlock bf) {
+Table* CatalogManager::getTable(string name) {
 	if (!hasTable(name))
 		throw ("ERROR in getTable: No table named " + name);
 	Attribute atb;
 	Index ind;
 	int pri;//primary
 	int bn;//blocknumber
+	name = "Table" + name;
 		   //获取指定block在内存中的序号**********************************
-	int blockNum = bf.read_block(name,0,1);
+	int blockNum  = buffer.read_block(name,0,1);
 	//通过序号在m_blocks[MAX_BLOCKS]中找到对应的内存信息（address）
-	char* begin = bf.m_blocks[blockNum].address;
+	char* begin = BufferBlock::m_blocks[blockNum].address;
 	int pos = 0;
 	//读表头
 	memcpy(&atb.num, &begin[pos], sizeof(int));
+	int a = atb.num;
 	pos = pos + sizeof(int);
 	memcpy(&ind.num, &begin[pos], sizeof(int));
+	int b = ind.num;
 	pos = pos + sizeof(int);
 	memcpy(&bn, &begin[pos], sizeof(int));
+	int c = bn;
 	pos = pos + sizeof(int);
 	memcpy(&pri, &begin[pos], sizeof(int));
+	int d = pri;
 	pos = pos + sizeof(int);
 	int pos1;
 
@@ -216,8 +225,8 @@ Table* CatalogManager::getTable(string name, BufferBlock bf) {
 
 }
 
-void CatalogManager::create_index(string tname, string aname, string iname, BufferBlock bf) {
-	Table* temp = getTable(tname,bf);
+void CatalogManager::create_index(string tname, string aname, string iname) {
+	Table* temp = getTable(tname);
 	try {
 		int i;
 		for (i = 0; i < temp->getattNum(); i++)
@@ -229,8 +238,8 @@ void CatalogManager::create_index(string tname, string aname, string iname, Buff
 			throw ("This attribute is not unique!");
 		temp->setindex(i, iname);
 //	cout << "index numaaaaa" << temp->index.num << endl;
-		int blockNum = bf.read_block(tname, 0, 1);//1 for table
-		char* begin = bf.m_blocks[blockNum].address;
+		int blockNum = buffer.read_block(tname, 0, 1);//1 for table
+		char* begin = BufferBlock::m_blocks[blockNum].address;
 
 		int pos = 0;
 		Attribute atb = temp->attr;
@@ -279,7 +288,7 @@ void CatalogManager::create_index(string tname, string aname, string iname, Buff
 			pos = pos + sizeof(short);
 		}
 
-		bf.using_block(blockNum);
+		//buffer.using_block(blockNum);
 		delete temp;
 	}
 	catch (string event) {
@@ -288,11 +297,11 @@ void CatalogManager::create_index(string tname, string aname, string iname, Buff
 	}
 }
 
-void CatalogManager::drop_table(string t, BufferBlock bf) {
+void CatalogManager::drop_table(string t) {
 	//t = "Table" + t;
 	if (!hasTable(t))
 		throw ("ERROR in drop_table: No table named " + t);
-	Table* tb = getTable(t,bf);
+	Table* tb = getTable(t);
 	/*API api;
 	api.DropTable(*tb);*/
 	//删除同名的文件
@@ -301,12 +310,12 @@ void CatalogManager::drop_table(string t, BufferBlock bf) {
 
 }
 
-void CatalogManager::drop_index(string tname, string iname, BufferBlock bf) {
-	Table* temp = getTable(tname,bf);
+void CatalogManager::drop_index(string tname, string iname) {
+	Table* temp = getTable(tname);
 	try {
 		temp->dropindex(iname);
-		drop_table(tname,bf);
-		recreate_table(tname, temp->attr, temp->primary, temp->index,bf);
+		drop_table(tname);
+		recreate_table(tname, temp->attr, temp->primary, temp->index);
 		delete temp;
 	}
 	catch (string event) {
@@ -315,8 +324,8 @@ void CatalogManager::drop_index(string tname, string iname, BufferBlock bf) {
 	}
 }
 
-void CatalogManager::show_table(string tname, BufferBlock bf) {
-	Table* t = getTable(tname,bf);
+void CatalogManager::show_table(string tname) {
+	Table* t = getTable(tname);
 	cout << tname << ":" << endl;
 	Index ind;
 	ind = t->Getindex();
@@ -345,10 +354,10 @@ void CatalogManager::show_table(string tname, BufferBlock bf) {
 	delete t;
 }
 
-void CatalogManager::changeblock(string tname, int bn, BufferBlock bf) {
+void CatalogManager::changeblock(string tname, int bn) {
 	string s = "Table" + tname;
-	int blockNum = bf.read_block(tname, 0, 1);//1 for table，将table头的信息读进来
-	char* begin = bf.m_blocks[blockNum].address;
+	int blockNum = buffer.read_block(tname, 0, 1);//1 for table，将table头的信息读进来
+	char* begin = BufferBlock::m_blocks[blockNum].address;
 	int pos = 0;
 	pos = pos + sizeof(int);
 	pos = pos + sizeof(int);

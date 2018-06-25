@@ -78,6 +78,9 @@
     <ClCompile Include="IndexManager.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
+    <ClCompile Include="InsertPos.cpp">
+      <Filter>來源檔案\DataType</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="API.h">
@@ -136,6 +139,9 @@
     </ClInclude>
     <ClInclude Include="IndexManager.h">
       <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="InsertPos.h">
+      <Filter>標頭檔\DataType</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

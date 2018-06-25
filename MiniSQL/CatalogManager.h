@@ -2,6 +2,7 @@
 
 #include "Table.h"
 #include "BufferBlock.h"
+extern BufferBlock buffer;
 
 using std::string;
 
@@ -11,13 +12,13 @@ public:
 	CatalogManager();
 	virtual ~CatalogManager();
 
-	void create_table(string name, Attribute atb, short primary, Index index, BufferBlock bf);
-	void recreate_table(string name, Attribute atb, short primary, Index index, BufferBlock bf);
+	void create_table(string name, Attribute atb, int primary, Index index);
+	void recreate_table(string name, Attribute atb, int primary, Index index);
 	bool hasTable(string name);
-	Table* getTable(string name, BufferBlock bf);
-	void create_index(string tname, string aname, string iname, BufferBlock bf);
-	void drop_table(string t, BufferBlock bf);
-	void drop_index(string tname, string iname, BufferBlock bf);
-	void show_table(string tname, BufferBlock bf);
-	void changeblock(string tname, int bn, BufferBlock bf);
+	Table* getTable(string name);
+	void create_index(string tname, string aname, string iname);
+	void drop_table(string t);
+	void drop_index(string tname, string iname);
+	void show_table(string tname);
+	void changeblock(string tname, int bn);
 };

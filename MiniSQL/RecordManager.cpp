@@ -36,7 +36,7 @@ bool RecordManager::CreateTable(Table& tableIn, BufferBlock buffer)
 	fout.close();
 	tableIn.blockNum = 1;
 	CatalogManager Ca;
-	Ca.changeblock(tableIn.getname(), tableIn.blockNum, buffer);
+	Ca.changeblock(tableIn.getname(), tableIn.blockNum);
 	return true;
 }
 
@@ -561,7 +561,7 @@ int RecordManager::addBlockInFile(Table& tableinfor)
 	buffer.m_blocks[bufferNum].name = tableinfor.getname() + ".table";
 	buffer.m_blocks[bufferNum].offset = tableinfor.blockNum++;
 	CatalogManager ca;
-	ca.changeblock(tableinfor.getname(), tableinfor.blockNum, buffer);
+	ca.changeblock(tableinfor.getname(), tableinfor.blockNum);
 	return bufferNum;
 }
 

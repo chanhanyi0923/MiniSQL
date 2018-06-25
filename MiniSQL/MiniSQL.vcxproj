@@ -126,6 +126,7 @@
     <ClCompile Include="DataI.cpp" />
     <ClCompile Include="Index.cpp" />
     <ClCompile Include="IndexManager.cpp" />
+    <ClCompile Include="InsertPos.cpp" />
     <ClCompile Include="Interpreter.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="QueryException.cpp" />
@@ -147,6 +148,7 @@
     <ClInclude Include="DataI.h" />
     <ClInclude Include="Index.h" />
     <ClInclude Include="IndexManager.h" />
+    <ClInclude Include="InsertPos.h" />
     <ClInclude Include="Interpreter.h" />
     <ClInclude Include="QueryException.h" />
     <ClInclude Include="RecordManager.h" />

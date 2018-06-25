@@ -11,7 +11,6 @@ private:
 public:
 
 	static BufferBlock* m_blocks;
-
 	char* address;		//块的首地址
 	std::string name;	//index或table的名字
 	unsigned int offset;		//文件中第几个块

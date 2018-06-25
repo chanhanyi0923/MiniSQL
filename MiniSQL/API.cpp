@@ -165,10 +165,10 @@ void API::createTable(
 	BufferBlock buffer;
 	CatalogManager catalog_manager;
 
-	catalog_manager.create_table(table, atb, primary, index, buffer);
+	catalog_manager.create_table(table, atb, primary, index);
 
 	if (primary != -1) {
-		catalog_manager.create_index(table, primary_key, primary_key, buffer);
+		catalog_manager.create_index(table, primary_key, primary_key);
 	}
 
 
@@ -180,7 +180,7 @@ void API::createTable(
 	////res = record_manager.CreateTable(tableIn);
 	//index_manager
 
-	Table * table_ptr = catalog_manager.getTable(table, buffer);
+	Table * table_ptr = catalog_manager.getTable(table);
 	record_manager.CreateTable(*table_ptr, buffer);
 	delete table_ptr;
 }

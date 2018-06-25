@@ -111,6 +111,7 @@ unsigned int BufferBlock::get_blank(std::string filename)
 	f.seekp(ofst);
 	f.write("$", 1);
 	f.close();
+	m_blocks[number].name = filename;
 	return number;
 }
 
