@@ -249,7 +249,7 @@ void RecordManager::Insert(Table& tableIn, Tuple& singleTuple)
 	
 	buffer.m_blocks[iPos.bufferNUM].written();
 	delete[] charTuple;
-	buffer.flush_all();
+	//buffer.flush_all();
 }
 
 int RecordManager::Delete(Table& tableIn, vector<int>mask, vector<Where> w) {
@@ -426,7 +426,7 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect, vector<int>ma
 		tableIn.linklist[i] = bufferNum;
 	}
 	
-	for (int blockOffset = 0; blockOffset < tableIn.blockNum; blockOffset++) {
+	for (int blockOffset = 1; blockOffset < tableIn.blockNum; blockOffset++) {
 
 		//返回一个
 
