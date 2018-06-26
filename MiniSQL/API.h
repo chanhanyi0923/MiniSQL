@@ -12,6 +12,7 @@ private:
 	RecordManager record_manager;
 
 	static Data * toData(const int attr_flag, const string & value);
+	static void toWhere(vector<Where> & where_conds, const vector<Condition> & conds, Table * table_ptr);
 
 public:
 	API();

@@ -53,34 +53,20 @@ Data * API::toData(const int attr_flag, const string & value)
 	}
 	else {
 		// char
-		data = new DataC(value);
+		if (value.front() == '\'' && value.back() == '\'') {
+			data = new DataC(value.substr(1, value.size() - 2));
+		} else if (value.front() == '"' && value.back() == '"') {
+			data = new DataC(value.substr(1, value.size() - 2));
+		} else {
+			data = new DataC(value);
+		}
 	}
 	return data;
 }
 
 
-
-
-void API::select(
-	const std::string & table,
-	const std::vector<std::string> & columns,
-	const std::vector<Condition> & conds
-)
+void API::toWhere(vector<Where> & where_conds, const vector<Condition> & conds, Table * table_ptr)
 {
-	CatalogManager catalog_manager;
-	RecordManager record_manager;
-
-	Table * table_ptr = catalog_manager.getTable(table);
-	//Table * table_ptr = nullptr;
-
-	//Table output = api.Select(*t, attrselect, attrwhere, w);
-
-	//return rm.Select(tableIn, attrSelect, mask, w);
-
-	vector<Where> where_conds;
-	vector<int> where_indices;
-	vector<int> select_indices;
-
 	for (const auto & cond : conds) {
 		Where w;
 
@@ -118,9 +104,33 @@ void API::select(
 
 		where_conds.push_back(w);
 	}
+}
+
+void API::select(
+	const std::string & table,
+	const std::vector<std::string> & columns,
+	const std::vector<Condition> & conds
+)
+{
+	CatalogManager catalog_manager;
+	RecordManager record_manager;
+
+	Table * table_ptr = catalog_manager.getTable(table);
+	//Table * table_ptr = nullptr;
+
+	//Table output = api.Select(*t, attrselect, attrwhere, w);
+
+	//return rm.Select(tableIn, attrSelect, mask, w);
+
+	vector<int> select_indices;
+
+	vector<Where> where_conds;
+	vector<int> where_indices;
+
+	API::toWhere(where_conds, conds, table_ptr);
 
 	const auto & table_attr = table_ptr->getattribute();
-
+	
 	for (int i = 0; i < table_attr.num; i++) {
 		const string & attr_name = table_attr.name[i];
 		for (const auto & cond : conds) {
@@ -136,6 +146,12 @@ void API::select(
 		}
 	}
 
+	if (columns.size() == 1 && columns.back() == "*") {
+		for (int i = 0; i < table_attr.num; i++) {
+			select_indices.push_back(i);
+		}
+	}
+
 	Table result = record_manager.Select(*table_ptr, select_indices, where_indices, where_conds);
 	result.display();
 }
@@ -146,38 +162,61 @@ void API::deleteFrom(
 	const std::vector<Condition> & conds
 )
 {
-	std::cout << "----------" << std::endl;
-	std::cout << "Table: {" << table << "}" << std::endl;
+	CatalogManager catalog_manager;
+	RecordManager record_manager;
 
-	std::cout << "Where: " << std::endl;
-	for (const auto & cond : conds) {
-		std::cout << "    {" << cond.column << "} ";
+	Table * table_ptr = catalog_manager.getTable(table);
 
-		std::string op;
-		switch (cond.type) {
-		case Condition::Equal:
-			op = "=";
-			break;
-		case Condition::NotEqual:
-			op = "<>";
-			break;
-		case Condition::Greater:
-			op = ">";
-			break;
-		case Condition::Less:
-			op = "<";
-			break;
-		case Condition::GreaterOrEqual:
-			op = ">=";
-			break;
-		case Condition::LessOrEqual:
-			op = "<=";
-			break;
+	vector<Where> where_conds;
+	vector<int> where_indices;
+
+	API::toWhere(where_conds, conds, table_ptr);
+
+	const auto & table_attr = table_ptr->getattribute();
+
+	for (int i = 0; i < table_attr.num; i++) {
+		const string & attr_name = table_attr.name[i];
+		for (const auto & cond : conds) {
+			if (cond.column == attr_name) {
+				where_indices.push_back(i);
+			}
 		}
-
-		std::cout << op << " {" << cond.value << "}" << std::endl;
 	}
-	std::cout << "----------" << std::endl;
+
+	record_manager.Delete(*table_ptr, where_indices, where_conds);
+
+	//std::cout << "----------" << std::endl;
+	//std::cout << "Table: {" << table << "}" << std::endl;
+
+	//std::cout << "Where: " << std::endl;
+	//for (const auto & cond : conds) {
+	//	std::cout << "    {" << cond.column << "} ";
+
+	//	std::string op;
+	//	switch (cond.type) {
+	//	case Condition::Equal:
+	//		op = "=";
+	//		break;
+	//	case Condition::NotEqual:
+	//		op = "<>";
+	//		break;
+	//	case Condition::Greater:
+	//		op = ">";
+	//		break;
+	//	case Condition::Less:
+	//		op = "<";
+	//		break;
+	//	case Condition::GreaterOrEqual:
+	//		op = ">=";
+	//		break;
+	//	case Condition::LessOrEqual:
+	//		op = "<=";
+	//		break;
+	//	}
+
+	//	std::cout << op << " {" << cond.value << "}" << std::endl;
+	//}
+	//std::cout << "----------" << std::endl;
 }
 
 
