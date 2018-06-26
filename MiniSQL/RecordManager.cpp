@@ -256,7 +256,7 @@ int RecordManager::Delete(Table& tableIn, vector<int>mask, vector<Where> w) {
 	string stringRow;
 
 	int count = 0;
-	int length = tableIn.dataSize() + 1;
+	int length = tableIn.dataSize() + 2;
 	const int recordNum = BLOCK_SIZE / length;
 	int bufferNum;
 	for (int i = 0; i < tableIn.blockNum; i++) {
@@ -274,6 +274,7 @@ int RecordManager::Delete(Table& tableIn, vector<int>mask, vector<Where> w) {
 			int position = offset * length;
 			stringRow = buffer.m_blocks[bufferNum].getvalues(position, position + length);
 			if (stringRow.c_str()[0] == EMPTY) continue;
+			if (stringRow.c_str()[0] == '$') break; //无有效数据
 			int c_pos = 1;
 			Tuple *temp_tuple = new Tuple;
 			for (int attr_index = 0; attr_index < tableIn.getattribute().num; attr_index++) {
@@ -303,6 +304,7 @@ int RecordManager::Delete(Table& tableIn, vector<int>mask, vector<Where> w) {
 				buffer.m_blocks[bufferNum].written();
 				count++;
 			}
+		BufferBlock::m_blocks[bufferNum].not_being_used();
 		}
 	}
 	return count;
@@ -428,7 +430,7 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect, vector<int>ma
 
 		//返回一个
 
-		int bufferNum = tableIn.linklist[blockOffset];
+		 bufferNum = tableIn.linklist[blockOffset];
 		//tableIn.linklist.push_back(bufferNum);
 		for (int offset = 0; offset < recordNum; offset++) {
 			int position = offset * length;
@@ -464,6 +466,7 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect, vector<int>ma
 			}
 			else delete temp_tuple;
 		}
+	BufferBlock::m_blocks[bufferNum].not_being_used();
 	}
 	return SelectProject(tableIn, attrSelect);
 }
@@ -482,7 +485,7 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect) {
 
 	for (int blockOffset = 1; blockOffset < tableIn.blockNum; blockOffset++) {
 		//读取整个文件中的所有内容
-		int bufferNum = tableIn.linklist[blockOffset];
+		bufferNum = tableIn.linklist[blockOffset];
 		for (int offset = 0; offset < recordNum; offset++) {
 			int position = offset * length;
 			//int size = 16 + tableIn.dataSize();
