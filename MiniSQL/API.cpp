@@ -308,8 +308,43 @@ void API::dropTable(
 	const std::string & table
 )
 {
-	std::cout << "----------" << std::endl;
-	std::cout << "Table: {" << table << "}" << std::endl;
+
+	//Table* t = cm.getTable(temp);
+
+	//if (t->index.num>0) {
+	//	for (int j = 0; j<t->index.num; j++) {
+	//		cm.drop_index(temp, t->index.indexname[j]);
+	//	}
+	//}
+
+	//if (qs[pos1 + 1] != ';')
+	//{
+	//	delete t;
+	//	throw QueryException("ERROR: invalid query format!");
+	//}
+
+
+	//delete  t;
+	//cm.drop_table(temp);
+
+	//std::cout << "----------" << std::endl;
+	//std::cout << "Table: {" << table << "}" << std::endl;
+
+	//void CataManager::drop_table(std::string t) {
+	//	if (!hasTable(t))
+	//		throw TableException("ERROR in drop_table: No table named " + t);
+	//	Table* tb = getTable(t);
+	//	API api;
+	//	api.DropTable(*tb);
+	//	remove(("T_" + t).c_str());
+	//}
+
+	//bool res;
+	//res = rm.DropTable(tableIn);
+	//for (int i = 0; i < tableIn.index.num; i++) {
+	//	DropIndex(tableIn, tableIn.index.location[i]);
+	//}
+	//return res;
 }
 
 void API::createIndex(
@@ -318,16 +353,65 @@ void API::createIndex(
 	const std::string & index
 )
 {
-	std::cout << "----------" << std::endl;
-	std::cout << "Table: {" << table << "}" << std::endl;
-	std::cout << "Column: {" << column << "}" << std::endl;
-	std::cout << "Index: {" << index << "}" << std::endl;
+	IndexManager index_manager;
+	CatalogManager catalog_manager;
+	RecordManager record_manager;
+
+	Table * table_ptr = catalog_manager.getTable(table);
+
+	const auto & table_attr = table_ptr->getattribute();
+
+	vector<int> select_indices;
+	int column_index = -1;
+
+	for (int i = 0; i < table_attr.num; i++) {
+		if (table_attr.name[i] == column) {
+			column_index = i;
+			break;
+		}
+	}
+
+	if (column_index == -1) {
+		throw QueryException(("Column " + column + " not found.").c_str());
+	}
+
+	select_indices.push_back(column_index);
+
+	const string filename = table + "_" + column + ".index";
+
+	// ???
+	// index_manager.Init(filename, );
+
+
+	Table result = record_manager.Select(*table_ptr, select_indices);
+	for (int i = 0; i < result.T.size(); i++) {
+		index_manager.Insert(filename, result.T[i]->data[column_index], i);
+	}
+
+	//std::cout << "----------" << std::endl;
+	//std::cout << "Table: {" << table << "}" << std::endl;
+	//std::cout << "Column: {" << column << "}" << std::endl;
+	//std::cout << "Index: {" << index << "}" << std::endl;
 }
 
 void API::dropIndex(
 	const std::string & index
 )
 {
+
+	//Table* temp = getTable(tname);
+	//try {
+	//	temp->dropindex(iname);
+	//	drop_table(tname);
+	//	create_table(tname, temp->attr, temp->primary, temp->index);
+	//	delete temp;
+	//}
+	//catch (TableException e1) {
+	//	delete temp;
+	//	throw e1;
+	//}
+
+
 	std::cout << "----------" << std::endl;
 	std::cout << "Index: {" << index << "}" << std::endl;
 }
