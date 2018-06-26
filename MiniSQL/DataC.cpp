@@ -8,6 +8,7 @@ DataC::DataC(std::string data)
 	if (flag == 0) {
 		flag = 1;
 	}
+	this->x = data;
 }
 
 
