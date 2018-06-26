@@ -416,7 +416,7 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect, vector<int>ma
 	string stringRow;
 	string indexfilename;
 	///////////////为什么+1？:第一位为有效位
-	int length = tableIn.dataSize() + 1;
+	int length = tableIn.dataSize() + 2;
 	const int recordNum = BLOCK_SIZE / length;
 	int bufferNum;
 	for (int i = 0; i < tableIn.blockNum; i++) {
@@ -434,6 +434,7 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect, vector<int>ma
 			int position = offset * length;
 			stringRow = buffer.m_blocks->m_blocks[bufferNum].getvalues(position, position + length);
 			if (stringRow.c_str()[0] == EMPTY) continue;//该行是空的
+			if (stringRow.c_str()[0] == '$') break; //无有效数据
 			int c_pos = 1;//当前在数据流中指针的位置，0表示该位是否有效，因此数据从第一位开始
 			Tuple *temp_tuple = new Tuple;
 			for (int attr_index = 0; attr_index < tableIn.getattribute().num; attr_index++) {
@@ -459,7 +460,7 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect, vector<int>ma
 			}//以上内容先从文件中生成一行tuper，一下判断是否满足要求
 
 			if (isSatisfied(tableIn, *temp_tuple, mask, w)) {
-				tableIn.addData(temp_tuple); //可能会存在问题;solved!
+				tableIn.addData(temp_tuple); //可能会存在问题
 			}
 			else delete temp_tuple;
 		}
@@ -470,7 +471,7 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect, vector<int>ma
 Table RecordManager::Select(Table& tableIn, vector<int>attrSelect) {
 	string stringRow;
 	Tuple* temp_tuple;
-	int length = tableIn.dataSize() + 1; //一个元组的信息在文档中的长度
+	int length = tableIn.dataSize() + 2; //一个元组的信息在文档中的长度
 	const int recordNum = BLOCK_SIZE / length; //一个block中存储的记录条数
 	int bufferNum;
 	for (int i = 0; i < tableIn.blockNum; i++) {
@@ -481,11 +482,6 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect) {
 
 	for (int blockOffset = 1; blockOffset < tableIn.blockNum; blockOffset++) {
 		//读取整个文件中的所有内容
-		//int bufferNum = buf_ptr->getIfIsInBuffer(filename, blockOffset);
-		//if (bufferNum == -1) { //该块不再内存中，读取之
-		//	bufferNum = buf_ptr->getEmptyBuffer();
-		//	buf_ptr->readBlock(filename, blockOffset, bufferNum);
-		//}
 		int bufferNum = tableIn.linklist[blockOffset];
 		for (int offset = 0; offset < recordNum; offset++) {
 			int position = offset * length;
@@ -495,7 +491,7 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect) {
 			if (stringRow.c_str()[0] == '$') break; //无有效数据
 			int c_pos = 1;//当前在数据流中指针的位置，0表示该位是否有效，因此数据从第一位开始
 			temp_tuple = new Tuple;
-			int aaaaaaaa = tableIn.getattribute().num;
+			//int aaaaaaaa = tableIn.getattribute().num;
 			for (int attr_index = 0; attr_index < tableIn.getattribute().num; attr_index++) {
 				if (tableIn.getattribute().flag[attr_index] == -1) {//是一个整数
 					int value;
