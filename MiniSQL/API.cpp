@@ -379,9 +379,21 @@ void API::createIndex(
 
 	const string filename = table + "_" + column + ".index";
 
-	// ???
-	// index_manager.Init(filename, );
+	// 0 for int, 1 for float, 2 for char
+	int key_type;
+	switch (table_attr.flag[column_index]) {
+	case -1: // int
+		key_type = 0;
+		break;
+	case 0: // float
+		key_type = 1;
+		break;
+	default: // char
+		key_type = 2;
+		break;
+	}
 
+	index_manager.Init(filename, key_type);
 
 	Table result = record_manager.Select(*table_ptr, select_indices);
 	for (int i = 0; i < result.T.size(); i++) {
