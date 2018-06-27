@@ -581,26 +581,32 @@ bool RecordManager::UNIQUE(Table& tableIn, Where w, int loca) {
 		}
 	}
 	int inflag = tableIn.attr.flag[loca];
+	int bufferNum;
+	for (int i = 0; i < tableIn.blockNum; i++) {
+		bufferNum = buffer.read_block(tableIn.Tname, i, 1);
+		tableIn.linklist[i] = bufferNum;
+	}
 	for (int blockOffset = 1; blockOffset < tableIn.blockNum; blockOffset++) {
 		//读取整个文件中的所有内容
-		int bufferNum = buffer.read_block(filename, blockOffset, 1);
+		//int bufferNum = buffer.read_block(filename, blockOffset, 1);
+		bufferNum = tableIn.linklist[blockOffset];
 		for (int offset = 0; offset < recordNum; offset++) {
 			int position = offset * length + attroff;
 			if (inflag == -1) {
 				int value;
-				memcpy(&value, &(buffer.m_blocks[bufferNum].address[position + 4]), sizeof(int));
+				memcpy(&value, &(buffer.m_blocks[bufferNum].address[position]), sizeof(int));
 				if (value == ((DataI*)(w.d))->x)
 					return false;
 			}
 			else if (inflag == 0) {
 				float value;
-				memcpy(&value, &(buffer.m_blocks[bufferNum].address[position + 4]), sizeof(float));
+				memcpy(&value, &(buffer.m_blocks[bufferNum].address[position]), sizeof(float));
 				if (value == ((DataF*)(w.d))->x)
 					return false;
 			}
 			else {
 				char value[MAXSTRINGLEN];
-				memcpy(value, &(buffer.m_blocks[bufferNum].address[position + 4]), tableIn.attr.flag[loca] + 1);
+				memcpy(value, &(buffer.m_blocks[bufferNum].address[position]), tableIn.attr.flag[loca] + 1);
 				if (string(value) == ((DataC*)(w.d))->x)
 					return false;
 			}
