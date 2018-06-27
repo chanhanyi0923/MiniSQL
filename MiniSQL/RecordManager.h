@@ -18,6 +18,9 @@ using std::vector;
 
 class RecordManager
 {
+private:
+	static int toKtype(int flag);
+
 public:
 	RecordManager();
 	RecordManager(BufferBlock bf);

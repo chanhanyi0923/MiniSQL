@@ -29,6 +29,20 @@ RecordManager::~RecordManager()
 }
 
 
+int RecordManager::toKtype(int flag)
+{
+	if (flag == -1) {
+		// int
+		return 0;
+	} else if (flag == 0) {
+		// float
+		return 1;
+	} else {
+		// char
+		return 2;
+	}
+}
+
 bool RecordManager::CreateTable(Table& tableIn, BufferBlock buffer)
 {
 	//string filename = tableIn.getname() + ".table";
@@ -221,7 +235,7 @@ void RecordManager::Insert(Table& tableIn, Tuple& singleTuple)
 	for (int i = 0; i < tableIn.index.num; i++) {
 		int tuperAddr = BufferBlock::m_blocks[iPos.bufferNUM].offset*blockCapacity + iPos.position / length; //the tuper's addr in the data file
 		for (int j = 0; j < tableIn.index.num; j++) {
-			indexMA.Init(tableIn.getname() + tableIn.attr.name[tableIn.index.location[j]] + ".index", tableIn.attr.flag[tableIn.index.location[i]]);
+			indexMA.Init(tableIn.getname() + tableIn.attr.name[tableIn.index.location[j]] + ".index", toKtype(tableIn.attr.flag[tableIn.index.location[i]]));
 			indexMA.Insert(tableIn.getname() + tableIn.attr.name[tableIn.index.location[j]] + ".index", singleTuple[tableIn.index.location[i]], tuperAddr);
 		}
 	}
@@ -287,7 +301,7 @@ int RecordManager::Delete(Table& tableIn, vector<int>mask, vector<Where> w) {
 				for (int i = 0; i < tableIn.index.num; i++) {
 					int tuperAddr = BufferBlock::m_blocks[position].offset*blockCapacity + position / length; //the tuper's addr in the data file
 					for (int j = 0; j < tableIn.index.num; j++) {
-						indexMA.Init(tableIn.getname() + tableIn.attr.name[tableIn.index.location[j]] + ".index", tableIn.attr.flag[tableIn.index.location[i]]);
+						indexMA.Init(tableIn.getname() + tableIn.attr.name[tableIn.index.location[j]] + ".index", toKtype(tableIn.attr.flag[tableIn.index.location[i]]));
 						indexMA.Delete(tableIn.getname() + tableIn.attr.name[tableIn.index.location[j]] + ".index", temp_tuple->data[tableIn.index.location[i]]);
 					}
 				}
@@ -426,7 +440,7 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect, vector<int>ma
 					Data* ptrData;
 					ptrData = w[i].d;
 					indexfilename = tableIn.Tname + to_string(mask[i]) + ".index";
-					indexMA.Init(indexfilename,tableIn.attr.flag[mask[i]]);
+					indexMA.Init(indexfilename, toKtype(tableIn.attr.flag[mask[i]]));
 					//inPos表示这条数据是第几个record
 					inPos = indexMA.Find(indexfilename, ptrData);
 					break;
@@ -619,7 +633,7 @@ void RecordManager::CreateIndex(Table& tableIn, int attr) {
 		tableIn.linklist[i] = bufferNum;
 	}
 	IndexManager index;
-	index.Init(tableIn.getname() + tableIn.attr.name[attr] + ".index", tableIn.attr.flag[attr]);
+	index.Init(tableIn.getname() + tableIn.attr.name[attr] + ".index", toKtype(tableIn.attr.flag[attr]));
 	for (int blockOffset = 1; blockOffset < tableIn.blockNum; blockOffset++) {
 		//返回一个
 		bufferNum = tableIn.linklist[blockOffset];
