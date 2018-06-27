@@ -283,24 +283,17 @@ void API::createTable(
 
 	BufferBlock buffer;
 	CatalogManager catalog_manager;
+	RecordManager record_manager;
 
 	catalog_manager.create_table(table, atb, primary, index);
 
-	if (primary != -1) {
-		catalog_manager.create_index(table, primary_key, primary_key);
-	}
-
-
-	//IndexManager index_manager;
-	////bool res;
-	////int i;
-
-	////getTable
-	////res = record_manager.CreateTable(tableIn);
-	//index_manager
-
 	Table * table_ptr = catalog_manager.getTable(table);
 	record_manager.CreateTable(*table_ptr, buffer);
+
+	if (primary != -1) {
+		record_manager.CreateIndex(*table_ptr, primary);
+	}
+
 	delete table_ptr;
 }
 
@@ -353,7 +346,6 @@ void API::createIndex(
 	const std::string & index
 )
 {
-	IndexManager index_manager;
 	CatalogManager catalog_manager;
 	RecordManager record_manager;
 
@@ -361,7 +353,6 @@ void API::createIndex(
 
 	const auto & table_attr = table_ptr->getattribute();
 
-	vector<int> select_indices;
 	int column_index = -1;
 
 	for (int i = 0; i < table_attr.num; i++) {
@@ -375,30 +366,31 @@ void API::createIndex(
 		throw QueryException(("Column " + column + " not found.").c_str());
 	}
 
-	select_indices.push_back(column_index);
 
-	const string filename = table + "_" + column + ".index";
+	record_manager.CreateIndex(*table_ptr, column_index);
 
-	// 0 for int, 1 for float, 2 for char
-	int key_type;
-	switch (table_attr.flag[column_index]) {
-	case -1: // int
-		key_type = 0;
-		break;
-	case 0: // float
-		key_type = 1;
-		break;
-	default: // char
-		key_type = 2;
-		break;
-	}
+	//const string filename = table + "_" + column + ".index";
 
-	index_manager.Init(filename, key_type);
+	//// 0 for int, 1 for float, 2 for char
+	//int key_type;
+	//switch (table_attr.flag[column_index]) {
+	//case -1: // int
+	//	key_type = 0;
+	//	break;
+	//case 0: // float
+	//	key_type = 1;
+	//	break;
+	//default: // char
+	//	key_type = 2;
+	//	break;
+	//}
 
-	Table result = record_manager.Select(*table_ptr, select_indices);
-	for (int i = 0; i < result.T.size(); i++) {
-		index_manager.Insert(filename, result.T[i]->data[column_index], i);
-	}
+	//index_manager.Init(filename, key_type);
+
+	//Table result = record_manager.Select(*table_ptr, select_indices);
+	//for (int i = 0; i < result.T.size(); i++) {
+	//	index_manager.Insert(filename, result.T[i]->data[column_index], i);
+	//}
 
 	//std::cout << "----------" << std::endl;
 	//std::cout << "Table: {" << table << "}" << std::endl;
