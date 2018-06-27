@@ -29,6 +29,10 @@ int main(int argc, char *argv[])
 					repeat = interpreter.execute(&api);
 				} catch (const QueryException & e) {
 					std::cout << "Syntax error: " << e.what() << std::endl;
+				} catch (const char * e) {
+					std::cout << e << std::endl;
+				} catch (...) {
+					std::cout << "Unknown error." << std::endl;
 				}
 				interpreter.clear();
 			}
@@ -56,6 +60,10 @@ int main(int argc, char *argv[])
 							repeat = interpreter.execute(&api);
 						} catch (const QueryException & e) {
 							std::cout << "Syntax error: " << e.what() << std::endl;
+						} catch (const char * e) {
+							std::cout << e << std::endl;
+						} catch (...) {
+							std::cout << "Unknown error." << std::endl;
 						}
 						interpreter.clear();
 					}

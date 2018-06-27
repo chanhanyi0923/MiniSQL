@@ -116,6 +116,9 @@ void API::select(
 	RecordManager record_manager;
 
 	Table * table_ptr = catalog_manager.getTable(table);
+	if (table_ptr == nullptr) {
+		throw QueryException(("Table '" + table + "' not found.").c_str());
+	}
 	//Table * table_ptr = nullptr;
 
 	//Table output = api.Select(*t, attrselect, attrwhere, w);
@@ -166,6 +169,9 @@ void API::deleteFrom(
 	RecordManager record_manager;
 
 	Table * table_ptr = catalog_manager.getTable(table);
+	if (table_ptr == nullptr) {
+		throw QueryException(("Table '" + table + "' not found.").c_str());
+	}
 
 	vector<Where> where_conds;
 	vector<int> where_indices;
@@ -229,6 +235,9 @@ void API::insert(
 	RecordManager record_manager;
 
 	Table * table_ptr = catalog_manager.getTable(table);
+	if (table_ptr == nullptr) {
+		throw QueryException(("Table '" + table + "' not found.").c_str());
+	}
 
 	const auto & table_attr = table_ptr->getattribute();
 
@@ -288,6 +297,10 @@ void API::createTable(
 	catalog_manager.create_table(table, atb, primary, index);
 
 	Table * table_ptr = catalog_manager.getTable(table);
+	if (table_ptr == nullptr) {
+		throw QueryException(("Table '" + table + "' not found.").c_str());
+	}
+
 	record_manager.CreateTable(*table_ptr, buffer);
 
 	if (primary != -1) {
@@ -301,8 +314,12 @@ void API::dropTable(
 	const std::string & table
 )
 {
+	CatalogManager catalog_manager;
+	RecordManager record_manager;
 
-	//Table* t = cm.getTable(temp);
+	Table* table_ptr = catalog_manager.getTable(table);
+	record_manager.DropTable(*table_ptr);
+	catalog_manager.drop_table(table);
 
 	//if (t->index.num>0) {
 	//	for (int j = 0; j<t->index.num; j++) {
@@ -350,6 +367,9 @@ void API::createIndex(
 	RecordManager record_manager;
 
 	Table * table_ptr = catalog_manager.getTable(table);
+	if (table_ptr == nullptr) {
+		throw QueryException(("Table '" + table + "' not found.").c_str());
+	}
 
 	const auto & table_attr = table_ptr->getattribute();
 
@@ -368,6 +388,8 @@ void API::createIndex(
 
 
 	record_manager.CreateIndex(*table_ptr, column_index);
+
+	catalog_manager.create_index(table, column, index);
 
 	//const string filename = table + "_" + column + ".index";
 
@@ -402,8 +424,20 @@ void API::dropIndex(
 	const std::string & index
 )
 {
+	CatalogManager catalog_manager;
+	RecordManager record_manager;
 
-	//Table* temp = getTable(tname);
+	//Table * table_ptr = nullptr;
+	//Table * table_ptr = catalog_manager.getTable(table);
+	//if (table_ptr == nullptr) {
+	//	throw QueryException(("Table '" + table + "' not found.").c_str());
+	//}
+	const std::string & table = "";
+
+
+	catalog_manager.drop_index(table, index);
+	
+
 	//try {
 	//	temp->dropindex(iname);
 	//	drop_table(tname);

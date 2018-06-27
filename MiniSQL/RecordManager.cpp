@@ -658,7 +658,5 @@ void RecordManager::CreateIndex(Table& tableIn, int attr) {
 		BufferBlock::m_blocks[bufferNum].not_being_used();
 	}
 
-	CatalogManager catalog;
-	catalog.create_index(tableIn.getname(), tableIn.attr.name[attr], tableIn.getname() + tableIn.attr.name[attr]);
 	return ;
 }
