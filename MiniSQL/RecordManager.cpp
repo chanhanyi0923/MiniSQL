@@ -109,7 +109,6 @@ Tuple RecordManager::String2Tuple(Table& tableIn, string stringRow)
 		if (tableIn.getattribute().flag[attr_index] == -1) {//是一个整数
 			int value;
 			memcpy(&value, &(stringRow.c_str()[c_pos]), sizeof(int));
-			printf("value:%08x\n", value);
 			c_pos += sizeof(int);
 			temp_tuple.addData(new DataI(value));
 		}
@@ -130,19 +129,6 @@ Tuple RecordManager::String2Tuple(Table& tableIn, string stringRow)
 	//以上内容先从文件中生成一行tuple
 	return temp_tuple;
 }
-
-//int RecordManager::FindWithIndex(Table& tableIn, Tuple& row, int mask) {
-//	IndexManager indexMA;
-//	for (int i = 0; i < tableIn.index.num; i++) {
-//		if (tableIn.index.location[i] == mask) { //找到索引
-//			Data* ptrData;
-//			ptrData = row[mask];
-//			int pos = indexMA.Find(tableIn.getname() + to_string(mask) + ".index", ptrData);
-//			return pos;
-//		}
-//	}
-//	return -1;
-//}
 
 void RecordManager::Insert(Table& tableIn, Tuple& singleTuple)
 {
@@ -171,10 +157,6 @@ void RecordManager::Insert(Table& tableIn, Tuple& singleTuple)
 			}
 			w.push_back(*uni_w);
 			mask.push_back(i);
-			//Table temp_table = Select(tableIn, mask, mask, w);
-			//if (temp_table.T.size() != 0) {
-			//throw ("Unique Value Redundancy occurs, thus insertion failed");
-			//}
 			//判断是否unique
 			if (!UNIQUE(tableIn, w[0], i)) {
 				throw ("Unique Value Redundancy occurs, thus insertion failed");
@@ -187,7 +169,7 @@ void RecordManager::Insert(Table& tableIn, Tuple& singleTuple)
 
 	char *charTuple;
 	charTuple = Tuple2Char(tableIn, singleTuple);//把一个元组转换成字符串
-												 //获取插入位置
+	//获取插入位置
 	InsertPos iPos;
 	if (tableIn.blockNum == 1) { //new file and no block exist 
 		iPos.bufferNUM = addBlockInFile(tableIn);
@@ -231,17 +213,18 @@ void RecordManager::Insert(Table& tableIn, Tuple& singleTuple)
 	//已经找到插入位置，开始插入
 	buffer.m_blocks[iPos.bufferNUM].address[iPos.position] = NOTEMPTY;
 	memcpy(&(buffer.m_blocks[iPos.bufferNUM].address[iPos.position + 1]), charTuple, tableIn.dataSize()+1);
-	//int length = tableIn.dataSize() + 1; //一个元组的信息在文档中的长度
+	int length = tableIn.dataSize() + 1; //一个元组的信息在文档中的长度,包括有效位
 	//////////////////////////////////////////////
 	//insert tuple into index file
-	//IndexManager indexMA;
-	//int blockCapacity = BLOCK_SIZE / length;
-	//for (int i = 0; i < tableIn.index.num; i++) {
-	//	int tuperAddr = buffer.m_blocks[iPos.bufferNUM].offset*blockCapacity + iPos.position / length; //the tuper's addr in the data file
-	//	for (int j = 0; j < tableIn.index.num; j++) {
-	//		indexMA.Insert(tableIn.getname() + to_string(tableIn.index.location[j]) + ".index", singleTuple[tableIn.index.location[i]], tuperAddr);
-	//	}
-	//}
+	IndexManager indexMA;
+	int blockCapacity = BLOCK_SIZE / length;
+	for (int i = 0; i < tableIn.index.num; i++) {
+		int tuperAddr = BufferBlock::m_blocks[iPos.bufferNUM].offset*blockCapacity + iPos.position / length; //the tuper's addr in the data file
+		for (int j = 0; j < tableIn.index.num; j++) {
+			indexMA.Init(tableIn.getname() + tableIn.attr.name[tableIn.index.location[j]] + ".index", tableIn.attr.flag[tableIn.index.location[i]]);
+			indexMA.Insert(tableIn.getname() + tableIn.attr.name[tableIn.index.location[j]] + ".index", singleTuple[tableIn.index.location[i]], tuperAddr);
+		}
+	}
 	//////////////////////////////////////////////
 	for (int i = 1; i < tableIn.blockNum; i++) {
 		buffer.m_blocks[tableIn.linklist[i]].not_being_used();
@@ -263,12 +246,8 @@ int RecordManager::Delete(Table& tableIn, vector<int>mask, vector<Where> w) {
 		bufferNum = buffer.read_block(tableIn.Tname, i, 1);
 		tableIn.linklist[i] = bufferNum;
 	}
+
 	for (int blockOffset = 1; blockOffset < tableIn.blockNum; blockOffset++) {
-		/*	int bufferNum = buf_ptr->getIfIsInBuffer(filename, blockOffset);
-		if (bufferNum == -1) {
-		bufferNum = buf_ptr->getEmptyBuffer();
-		buf_ptr->readBlock(filename, blockOffset, bufferNum);
-		}*/
 		bufferNum = tableIn.linklist[blockOffset];
 		for (int offset = 0; offset < recordNum; offset++) {
 			int position = offset * length;
@@ -303,7 +282,17 @@ int RecordManager::Delete(Table& tableIn, vector<int>mask, vector<Where> w) {
 				buffer.m_blocks[bufferNum].address[position] = DELETED; //DELETED==EMYTP
 				buffer.m_blocks[bufferNum].written();
 				count++;
+				IndexManager indexMA;
+				int blockCapacity = BLOCK_SIZE / length;
+				for (int i = 0; i < tableIn.index.num; i++) {
+					int tuperAddr = BufferBlock::m_blocks[position].offset*blockCapacity + position / length; //the tuper's addr in the data file
+					for (int j = 0; j < tableIn.index.num; j++) {
+						indexMA.Init(tableIn.getname() + tableIn.attr.name[tableIn.index.location[j]] + ".index", tableIn.attr.flag[tableIn.index.location[i]]);
+						indexMA.Delete(tableIn.getname() + tableIn.attr.name[tableIn.index.location[j]] + ".index", temp_tuple->data[tableIn.index.location[i]]);
+					}
+				}
 			}
+			
 		BufferBlock::m_blocks[bufferNum].not_being_used();
 		}
 	}
@@ -417,7 +406,7 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect, vector<int>ma
 	}
 	string stringRow;
 	string indexfilename;
-	///////////////为什么+1？:第一位为有效位
+	//+2：多两位
 	int length = tableIn.dataSize() + 2;
 	const int recordNum = BLOCK_SIZE / length;
 	int bufferNum;
@@ -426,10 +415,47 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect, vector<int>ma
 		tableIn.linklist[i] = bufferNum;
 	}
 	
+	//to find whether there is an index on selected key
+	IndexManager indexMA;
+
+	int inPos = -1;//index position
+	for (int i = 0; i < w.size(); i++) {
+		if (w[i].flag == 0) {
+			for (int j = 0; j < tableIn.index.num; j++) {
+				if (tableIn.index.location[j] == mask[i]) {
+					Data* ptrData;
+					ptrData = w[i].d;
+					indexfilename = tableIn.Tname + to_string(mask[i]) + ".index";
+					indexMA.Init(indexfilename,tableIn.attr.flag[mask[i]]);
+					//inPos表示这条数据是第几个record
+					inPos = indexMA.Find(indexfilename, ptrData);
+					break;
+				}
+			}
+			if (inPos != -1) {
+				break;
+			}
+		}
+
+	}// finding.... 
+	if (inPos != -1) { //result found
+		int blockOffset = inPos / recordNum;
+		int recordOffset = inPos % recordNum;
+		int datalength = tableIn.dataSize()+2;
+		int bitOffset = recordOffset * (datalength);//多了一个有效位和一个结尾的'\0'
+		bufferNum = tableIn.linklist[blockOffset];
+		char *pdata;
+		pdata = new char(datalength);
+		memcpy(pdata, &(BufferBlock::m_blocks[bufferNum].address[bitOffset]), datalength);
+
+		Tuple *single_tuple = Char2Tuple(tableIn, pdata);
+		//delete[] pdata;
+		tableIn.addData(single_tuple);
+		return SelectProject(tableIn, attrSelect);
+	}
+
 	for (int blockOffset = 1; blockOffset < tableIn.blockNum; blockOffset++) {
-
 		//返回一个
-
 		 bufferNum = tableIn.linklist[blockOffset];
 		//tableIn.linklist.push_back(bufferNum);
 		for (int offset = 0; offset < recordNum; offset++) {
@@ -488,7 +514,6 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect) {
 		bufferNum = tableIn.linklist[blockOffset];
 		for (int offset = 0; offset < recordNum; offset++) {
 			int position = offset * length;
-			//int size = 16 + tableIn.dataSize();
 			stringRow = buffer.m_blocks[bufferNum].getvalues(position, position + length);
 			if (stringRow.c_str()[0] == EMPTY) continue;//该行是空的	
 			if (stringRow.c_str()[0] == '$') break; //无有效数据
@@ -582,3 +607,58 @@ int RecordManager::addBlockInFile(Table& tableinfor)
 	return bufferNum;
 }
 
+void RecordManager::CreateIndex(Table& tableIn, int attr) {
+	string stringRow;
+	string indexfilename;
+	//+2：多两位
+	int length = tableIn.dataSize() + 2;
+	const int recordNum = BLOCK_SIZE / length;
+	int bufferNum;
+	for (int i = 0; i < tableIn.blockNum; i++) {
+		bufferNum = buffer.read_block(tableIn.Tname, i, 1);
+		tableIn.linklist[i] = bufferNum;
+	}
+	IndexManager index;
+	index.Init(tableIn.getname() + tableIn.attr.name[attr] + ".index", tableIn.attr.flag[attr]);
+	for (int blockOffset = 1; blockOffset < tableIn.blockNum; blockOffset++) {
+		//返回一个
+		bufferNum = tableIn.linklist[blockOffset];
+		//tableIn.linklist.push_back(bufferNum);
+		for (int offset = 0; offset < recordNum; offset++) {
+			int position = offset * length;
+			stringRow = buffer.m_blocks->m_blocks[bufferNum].getvalues(position, position + length);
+			if (stringRow.c_str()[0] == EMPTY) continue;//该行是空的
+			if (stringRow.c_str()[0] == '$') break; //无有效数据
+			int c_pos = 1;//当前在数据流中指针的位置，0表示该位是否有效，因此数据从第一位开始
+			Tuple *temp_tuple = new Tuple;
+			for (int attr_index = 0; attr_index < tableIn.getattribute().num; attr_index++) {
+				if (tableIn.getattribute().flag[attr_index] == -1) {//是一个整数
+					int value;
+					memcpy(&value, &(stringRow.c_str()[c_pos]), sizeof(int));
+					c_pos += sizeof(int);
+					temp_tuple->addData(new DataI(value));
+				}
+				else if (tableIn.getattribute().flag[attr_index] == 0) {//float
+					float value;
+					memcpy(&value, &(stringRow.c_str()[c_pos]), sizeof(float));
+					c_pos += sizeof(float);
+					temp_tuple->addData(new DataF(value));
+				}
+				else {
+					char value[MAXSTRINGLEN];
+					int strLen = tableIn.getattribute().flag[attr_index] + 1;
+					memcpy(value, &(stringRow.c_str()[c_pos]), strLen);
+					c_pos += strLen;
+					temp_tuple->addData(new DataC(string(value)));
+				}
+			}//以上内容先从文件中生成一行tuper，一下判断是否满足要求
+			index.Insert(tableIn.getname(), temp_tuple->data[attr], position);
+			delete temp_tuple;
+		}
+		BufferBlock::m_blocks[bufferNum].not_being_used();
+	}
+
+	CatalogManager catalog;
+	catalog.create_index(tableIn.getname(), tableIn.attr.name[attr], tableIn.getname() + tableIn.attr.name[attr]);
+	return ;
+}

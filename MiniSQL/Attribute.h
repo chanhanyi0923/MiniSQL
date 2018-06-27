@@ -9,7 +9,7 @@ public:
 	//attribute name
 	std::string name[32];
 
-	//unique  设置主键
+	//unique  设置唯一性
 	bool unique[32];
 
 	int num;

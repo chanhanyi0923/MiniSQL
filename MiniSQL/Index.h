@@ -5,7 +5,7 @@
 class Index
 {
 public:
-	//index个数
+	//index个数 
 	int num;
 
 	//存的值是attribute的位置
