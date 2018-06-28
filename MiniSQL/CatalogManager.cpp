@@ -226,6 +226,7 @@ Table* CatalogManager::getTable(string name) {
 }
 
 void CatalogManager::create_index(string tname, string aname, string iname) {
+	
 	Table* temp = getTable(tname);
 	try {
 		int i;
@@ -238,7 +239,7 @@ void CatalogManager::create_index(string tname, string aname, string iname) {
 			throw ("This attribute is not unique!");
 		temp->setindex(i, iname);
 //	cout << "index numaaaaa" << temp->index.num << endl;
-		int blockNum = buffer.read_block(tname, 0, 1);//1 for table
+		int blockNum = buffer.read_block("Table"+ tname, 0, 1);//1 for table
 		char* begin = BufferBlock::m_blocks[blockNum].address;
 
 		int pos = 0;

@@ -54,7 +54,7 @@ unsigned int BufferBlock::read_block(std::string filename, unsigned int offset, 
 	}
 	//未找到块，需要从文件中读取
 	unsigned int number = get_blank(offset);
-	m_blocks->table_index = table_index;
+	//m_blocks->table_index = table_index;
 	m_blocks[number].name = filename;
 	m_blocks[number].table_index = table_index;
 	std::ifstream f;

@@ -55,7 +55,8 @@ void IndexManager::Init(string filename, int keyType)
 	int headBlockNo = buffer.read_block(fname, 0, INDEX);
 	char* p = BufferBlock::m_blocks[headBlockNo].address;
 	rootOffset = *(int*)p;
-	Ktype = *(int*)(p + 4);
+	Ktype = keyType;
+//	Ktype = *(int*)(p + 4);
 	if (Ktype == 0) Klen = sizeof(int);
 	else if (Ktype == 1) Klen = sizeof(float);
 	else if (Ktype == 2) Klen = MAX_STRING_LENGTH;
