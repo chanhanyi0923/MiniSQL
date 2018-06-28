@@ -4,7 +4,7 @@
 #include "BufferBlock.h"
 #include "Data.h"
 
-#define MAX_STRING_LENGTH 50
+#define MAX_STRING_LENGTH 100
 #define blockHead 17
 #define INTERNAL 'i'
 #define LEAF 'l'
