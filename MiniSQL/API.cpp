@@ -2,6 +2,7 @@
 
 
 #include <iostream>
+#include <fstream>
 
 #include <boost/lexical_cast.hpp>
 
@@ -432,25 +433,20 @@ void API::dropIndex(
 	//if (table_ptr == nullptr) {
 	//	throw QueryException(("Table '" + table + "' not found.").c_str());
 	//}
-	const std::string & table = "";
 
 
-	catalog_manager.drop_index(table, index);
-	
+	//const std::string & table = "";
 
-	//try {
-	//	temp->dropindex(iname);
-	//	drop_table(tname);
-	//	create_table(tname, temp->attr, temp->primary, temp->index);
-	//	delete temp;
-	//}
-	//catch (TableException e1) {
-	//	delete temp;
-	//	throw e1;
-	//}
+	std::string table;
 
+	std::fstream f_index_to_table;
+	f_index_to_table.open(index + ".totable", std::fstream::out);
+	f_index_to_table >> table;
+	f_index_to_table.close();
 
-	std::cout << "----------" << std::endl;
-	std::cout << "Index: {" << index << "}" << std::endl;
+	catalog_manager.drop_index(table, index);	
+
+	//std::cout << "----------" << std::endl;
+	//std::cout << "Index: {" << index << "}" << std::endl;
 }
 

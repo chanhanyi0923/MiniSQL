@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 				interpreter.setSourceType(Interpreter::StdCin);
 			}
 		}
-		BufferBlock::flush_all();
 	}
+	BufferBlock::flush_all();
 	return 0;
 }

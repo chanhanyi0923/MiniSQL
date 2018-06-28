@@ -246,7 +246,7 @@ void RecordManager::Insert(Table& tableIn, Tuple& singleTuple)
 	
 	buffer.m_blocks[iPos.bufferNUM].written();
 	delete[] charTuple;
-	buffer.flush_all();
+	// buffer.flush_all();
 }
 
 int RecordManager::Delete(Table& tableIn, vector<int>mask, vector<Where> w) {
