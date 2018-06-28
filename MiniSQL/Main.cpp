@@ -10,6 +10,15 @@
 BufferBlock * BufferBlock::m_blocks = NULL;
 BufferBlock buffer;
 
+void flush()
+{
+	static int count = 0;
+	if (++count == 100) {
+		count = 0;
+		BufferBlock::flush_all();
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	BufferBlock::initiate_blocks();
@@ -27,6 +36,7 @@ int main(int argc, char *argv[])
 			if (!interpreter.empty()) {
 				try {
 					repeat = interpreter.execute(&api);
+					flush();
 				} catch (const QueryException & e) {
 					std::cout << "Syntax error: " << e.what() << std::endl;
 				} catch (const char * e) {
@@ -58,6 +68,7 @@ int main(int argc, char *argv[])
 						std::cout << "minisql(file)> " << interpreter.getQueryString() << std::endl;
 						try {
 							repeat = interpreter.execute(&api);
+							flush();
 						} catch (const QueryException & e) {
 							std::cout << "Syntax error: " << e.what() << std::endl;
 						} catch (const char * e) {
