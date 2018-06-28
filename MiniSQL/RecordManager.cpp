@@ -201,14 +201,14 @@ void RecordManager::Insert(Table& tableIn, Tuple& singleTuple)
 		}
 		//在每一个储存有数据的block块都比较
 		for (int i = 1; i < tableIn.blockNum; i++) {
-			length = tableIn.dataSize() + 1; //多余的一位放在开头，表示是否有效
+			length = tableIn.dataSize() + 2; //多余的一位放在开头，表示是否有效
 											 //blockOffset = tableIn.linklist[i];
 			bufferNum = tableIn.linklist[i];
 			recordNum = BLOCK_SIZE / length;
 			for (int offset = 0; offset < recordNum; offset++) {
 				int position = offset * length;
 				char isEmpty = buffer.m_blocks[bufferNum].address[position];//检查第一位是否有效，判断该行是否有内容
-				if (isEmpty == EMPTY) {//find an empty space
+				if (isEmpty == EMPTY||isEmpty == '$') {//find an empty space
 					iPos.bufferNUM = bufferNum;
 					iPos.position = position;
 					flag = 1;
@@ -226,7 +226,7 @@ void RecordManager::Insert(Table& tableIn, Tuple& singleTuple)
 	}
 	//已经找到插入位置，开始插入
 	buffer.m_blocks[iPos.bufferNUM].address[iPos.position] = NOTEMPTY;
-	memcpy(&(buffer.m_blocks[iPos.bufferNUM].address[iPos.position + 1]), charTuple, tableIn.dataSize()+1);
+	memcpy(&(buffer.m_blocks[iPos.bufferNUM].address[iPos.position + 1]), charTuple, tableIn.dataSize() + 1);
 	int length = tableIn.dataSize() + 1; //一个元组的信息在文档中的长度,包括有效位
 	//////////////////////////////////////////////
 	//insert tuple into index file
@@ -246,7 +246,7 @@ void RecordManager::Insert(Table& tableIn, Tuple& singleTuple)
 	
 	buffer.m_blocks[iPos.bufferNUM].written();
 	delete[] charTuple;
-	//buffer.flush_all();
+	buffer.flush_all();
 }
 
 int RecordManager::Delete(Table& tableIn, vector<int>mask, vector<Where> w) {
@@ -471,7 +471,6 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect, vector<int>ma
 	for (int blockOffset = 1; blockOffset < tableIn.blockNum; blockOffset++) {
 		//返回一个
 		 bufferNum = tableIn.linklist[blockOffset];
-		//tableIn.linklist.push_back(bufferNum);
 		for (int offset = 0; offset < recordNum; offset++) {
 			int position = offset * length;
 			stringRow = buffer.m_blocks->m_blocks[bufferNum].getvalues(position, position + length);
@@ -528,12 +527,11 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect) {
 		bufferNum = tableIn.linklist[blockOffset];
 		for (int offset = 0; offset < recordNum; offset++) {
 			int position = offset * length;
-			stringRow = buffer.m_blocks[bufferNum].getvalues(position, position + length);
+			stringRow = buffer.m_blocks[bufferNum].getvalues(position, position + length-1);
 			if (stringRow.c_str()[0] == EMPTY) continue;//该行是空的	
 			if (stringRow.c_str()[0] == '$') break; //无有效数据
 			int c_pos = 1;//当前在数据流中指针的位置，0表示该位是否有效，因此数据从第一位开始
 			temp_tuple = new Tuple;
-			//int aaaaaaaa = tableIn.getattribute().num;
 			for (int attr_index = 0; attr_index < tableIn.getattribute().num; attr_index++) {
 				if (tableIn.getattribute().flag[attr_index] == -1) {//是一个整数
 					int value;
@@ -555,7 +553,7 @@ Table RecordManager::Select(Table& tableIn, vector<int>attrSelect) {
 					temp_tuple->addData(new DataC(string(value)));
 				}
 			}
-			tableIn.addData(temp_tuple); //可能会存在问题;
+			tableIn.addData(temp_tuple); 
 		}
 	BufferBlock::m_blocks[bufferNum].not_being_used();
 	}
