@@ -13,7 +13,7 @@ BufferBlock buffer;
 void flush()
 {
 	static int count = 0;
-	if (++count == 100) {
+	if (++count == 20) {
 		count = 0;
 		BufferBlock::flush_all();
 	}
@@ -86,6 +86,7 @@ int main(int argc, char *argv[])
 				interpreter.setSourceType(Interpreter::StdCin);
 			}
 		}
+		BufferBlock::flush_all();
 	}
 	return 0;
 }
